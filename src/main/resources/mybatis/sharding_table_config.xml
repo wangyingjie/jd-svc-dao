@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE shardingConfig PUBLIC "-//shardbatis.googlecode.com//DTD Shardbatis 2.0//EN"
+        "http://shardbatis.googlecode.com/dtd/shardbatis-config.dtd">
+    <!--* 1.<selectKey>不做解析-->
+    <!--* 2.在ignoreList里的sql不用处理-->
+    <!--* 3.如果不在ignoreList里并且没有配置parseList则进行处理-->
+    <!--* 4.如果不在ignoreList里并且也在parseList里则进行处理-->
+    <!--* 5.如果不在ignoreList里并且没有配置parseList则进行处理-->
+
+<shardingConfig>
+
+   <!-- <ignoreList>
+        <value>com.jd.jmi.order.soa.jmiOrderPay.updateConsole</value>
+    </ignoreList>-->
+
+    <!--<parseList>-->
+        <!--<value>jmi.ware.task.insertJmiWareTask</value>-->
+        <!--<value>jmi.ware.task.searchWareTask</value>-->
+    <!--</parseList>-->
+
+    <!--表名必须和数据对应上-->
+    <strategy tableName="svc_booking_order" strategyClass="com.jd.svc.dao.shard.ShardStrategyImpl"/>
+
+</shardingConfig>

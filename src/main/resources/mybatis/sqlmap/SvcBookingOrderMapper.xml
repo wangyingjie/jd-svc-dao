@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--<mapper namespace="com.jd.svc.domain.SvcBookingOrder">-->
+<mapper namespace="com.jd.svc.dao.mapper.SvcBookingOrderMapper">
+    <resultMap id="BaseResultMap" type="SvcBookingOrder">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="booking_id" property="bookingId" jdbcType="BIGINT"/>
+        <result column="root_order_id" property="rootOrderId" jdbcType="BIGINT"/>
+        <result column="direct_order_id" property="directOrderId" jdbcType="BIGINT"/>
+        <result column="erp_order_id" property="erpOrderId" jdbcType="BIGINT"/>
+        <result column="sku_info" property="skuInfo" jdbcType="VARCHAR"/>
+        <result column="order_fee" property="orderFee" />
+        <result column="deliver_status" property="deliverStatus" jdbcType="INTEGER"/>
+        <result column="orb_status" property="orbStatus" jdbcType="INTEGER"/>
+        <result column="afs_status" property="afsStatus" jdbcType="INTEGER"/>
+        <result column="generated_time" property="generatedTime" jdbcType="TIMESTAMP"/>
+        <result column="features" property="features" jdbcType="VARCHAR"/>
+        <result column="created" property="created" jdbcType="TIMESTAMP"/>
+        <result column="modified" property="modified" jdbcType="TIMESTAMP"/>
+        <result column="yn" property="yn" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, booking_id, root_order_id, direct_order_id, erp_order_id, sku_info, order_fee,
+        deliver_status, orb_status, afs_status, generated_time, features, created, modified,
+        yn
+    </sql>
+
+    <!--根据顶级父单号获取所有实物子单记录-->
+    <select id="getAllOrderByRootOrderId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from svc_booking_order
+        where root_order_id = #{rootOrderId} and yn = 1
+    </select>
+
+    <!--获取未妥投的子单列表-->
+    <select id="getNoDeliverOrderByRootOrderId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from svc_booking_order
+        where root_order_id = #{rootOrderId} and deliver_status = 0 and yn = 1
+    </select>
+
+    <insert id="insertSvcBookingOrder" parameterType="SvcBookingOrder">
+    insert into svc_booking_order (
+        id, booking_id, root_order_id, direct_order_id, erp_order_id, sku_info,
+        order_fee, deliver_status, orb_status, afs_status, generated_time, features, created,  yn
+     )
+    values (#{id}, #{bookingId}, #{rootOrderId},
+      #{directOrderId}, #{erpOrderId}, #{skuInfo},
+      #{orderFee}, #{deliverStatus}, #{orbStatus},
+      #{afsStatus}, #{generatedTime}, #{features}, now(), 1)
+  </insert>
+
+    <!--批量插入-->
+    <insert id="batchInsertSvcBookingOrder" parameterType="java.util.List">
+        insert into svc_booking_order
+        (
+        id, booking_id, root_order_id, direct_order_id, erp_order_id, sku_info, order_fee,
+        deliver_status, orb_status, afs_status, generated_time, features, created, yn
+        )
+        values
+        <foreach collection="list" item="order" index="index" separator=",">
+            (
+            #{order.id},
+            #{order.bookingId},
+            #{order.rootOrderId},
+            #{order.directOrderId},
+            #{order.erpOrderId},
+            #{order.skuInfo},
+            #{order.orderFee},
+            #{order.deliverStatus},
+            #{order.orbStatus},
+            #{order.afsStatus},
+            #{order.generatedTime},
+            #{order.features},
+            now(),
+            1
+            )
+        </foreach>
+    </insert>
+
+
+    <!--根据预约ID获取所有实物子单记录-->
+    <select id="getBookingOrderByBookingId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from svc_booking_order
+        where booking_id = #{bookingId} and yn = 1
+    </select>
+
+</mapper>

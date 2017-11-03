@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd"
+       default-autowire="byName">
+
+    <!--主库数据源-->
+    <bean id="abstractSvcMasterDataSourcePool" class="com.alibaba.druid.pool.DruidDataSource" abstract="true"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${svc.admin.jdbc.driver}"/>
+        <property value="15000" name="maxWait"/>
+        <property value="true" name="useUnfairLock"/>
+        <property value="3" name="initialSize"/>
+        <property value="3" name="minIdle"/>
+        <property value="20" name="maxActive"/>
+        <property name="removeAbandoned" value="false"/>
+        <property value="60000" name="timeBetweenEvictionRunsMillis"/>
+        <property value="180000" name="minEvictableIdleTimeMillis"/>
+        <property value="SELECT 'x'" name="validationQuery"/>
+        <property value="true" name="testWhileIdle"/>
+        <property value="false" name="testOnBorrow"/>
+        <property value="false" name="testOnReturn"/>
+        <property value="false" name="poolPreparedStatements"/>
+        <property value="-1" name="maxPoolPreparedStatementPerConnectionSize"/>
+        <property value="stat" name="filters"/>
+    </bean>
+
+    <!--主库_1 配置-->
+    <bean id="masterDataSourcePool_0" parent="abstractSvcMasterDataSourcePool">
+        <property name="url" value="${svc.admin.jdbc.url}"/>
+        <property name="username" value="${svc.admin.jdbc.username}"/>
+        <property name="password" value="${svc.admin.jdbc.password}"/>
+        <property name="name" value="master_0"/>
+    </bean>
+
+    <!--主库_1 配置-->
+    <bean id="masterDataSourcePool_1" parent="abstractSvcMasterDataSourcePool">
+        <property name="url" value="${svc.admin.jdbc.url}"/>
+        <property name="username" value="${svc.admin.jdbc.username}"/>
+        <property name="password" value="${svc.admin.jdbc.password}"/>
+        <property name="name" value="master_1"/>
+    </bean>
+
+    <bean id="master_DataSource_0" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource" ref="masterDataSourcePool_0"/>
+    </bean>
+
+    <bean id="master_DataSource_1" class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+        <property name="targetDataSource" ref="masterDataSourcePool_1"/>
+    </bean>
+
+    <bean id="transactionManager" class="com.jd.cobarclient.mybatis.transaction.MultiDataSourceTransactionManager">
+        <property name="shards" ref="shardSet"/>
+        <property name="transactionSynchronization" value="2"/>
+    </bean>
+
+    <!-- 事务管理器的注解解析器 -->
+    <tx:annotation-driven mode="proxy" transaction-manager="transactionManager"/>
+
+</beans>

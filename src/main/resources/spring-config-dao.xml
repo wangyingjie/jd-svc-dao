@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://mybatis.org/schema/mybatis-spring
+       http://mybatis.org/schema/mybatis-spring.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd"
+       default-autowire="byName">
+
+    <!--扫描Mybatis的Mapper  template-ref="sqlSessionTemplate"  -->
+    <mybatis:scan base-package="com.jd.svc.dao.mapper" template-ref="shardSqlSessionTemplate"/>
+
+    <!-- 自定义template -->
+    <bean id="shardSqlSessionTemplate" class="com.jd.svc.dao.shard.ShardSqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+        <property name="router" ref="router"/>
+        <property name="shards" ref="shardSet"/>
+    </bean>
+
+    <bean id="router" class="com.alibaba.cobarclient.config.SimpleRouterFactoryBean">
+        <property name="configLocations">
+            <list>
+                <value>classpath:/mybatis/sharding-db-config.xml</value>
+            </list>
+        </property>
+        <property name="functions">
+            <map>
+                <entry key="hash" value-ref="hashFunction"></entry>
+            </map>
+        </property>
+        <property name="shards" ref="shardSet"/>
+    </bean>
+
+    <bean id="hashFunction" class="com.jd.svc.dao.shard.ShardStrategyImpl"></bean>
+
+    <util:set id="shardSet" set-class="java.util.LinkedHashSet">
+        <ref bean="master_1"/>
+        <ref bean="master_2"/>
+        <ref bean="slave_1"/>
+        <ref bean="slave_2"/>
+    </util:set>
+
+    <bean id="master_1" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="master_1"/>
+        <property name="dataSource" ref="master_DataSource_0"/>
+        <property name="description" value="db0"/>
+    </bean>
+
+    <bean id="slave_1" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="slave_1"/>
+        <property name="dataSource" ref="master_DataSource_0"/>
+        <property name="description" value="db0"/>
+    </bean>
+
+
+    <bean id="master_2" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="master_2"/>
+        <property name="dataSource" ref="master_DataSource_1"/>
+        <property name="description" value="db1"/>
+    </bean>
+
+    <bean id="slave_2" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="slave_2"/>
+        <property name="dataSource" ref="master_DataSource_1"/>
+        <property name="description" value="db1"/>
+    </bean>
+
+    <bean id="sqlSessionTemplate" class="com.jd.cobarclient.mybatis.spring.MySqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+        <property name="router" ref="router"/>
+        <property name="shards" ref="shardSet"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--默认数据源,没有找到路由规则的时候向这个库读写数据-->
+        <property name="dataSource" ref="master_DataSource_0"/>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath:mybatis/sqlmap/*.xml"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,46 @@
+<rules>
+    <!--表达式如果不使用自定义路由规则函数,而是直接使用   erpOrderId%2==0这种的话就不用在文件中配置<property name="functionsMap">中了-->
+    <!--<rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, slave) == 1</shardingExpression>
+        <shards>master_1</shards>
+    </rule>
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, slave) == 10</shardingExpression>
+        <shards>slave_10</shards>
+    </rule>
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, slave) == 2</shardingExpression>
+        <shards>master_2</shards>
+    </rule>
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, slave) == 20</shardingExpression>
+        <shards>slave_20</shards>
+    </rule>-->
+
+
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, id, slave).equals("master_1")</shardingExpression>
+        <shards>master_1</shards>
+    </rule>
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, id, slave).equals("master_2")</shardingExpression>
+        <shards>master_2</shards>
+    </rule>
+
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, id, slave).equals("slave_1")</shardingExpression>
+        <shards>slave_1</shards>
+    </rule>
+    <rule>
+        <namespace>com.jd.svc.dao.mapper.SvcBookingOrderMapper</namespace>
+        <shardingExpression>hash.shardingDB(erpOrderId, id, slave).equals("slave_2")</shardingExpression>
+        <shards>slave_2</shards>
+    </rule>
+</rules>
